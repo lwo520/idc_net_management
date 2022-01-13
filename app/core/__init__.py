@@ -2,6 +2,8 @@ import hashlib
 import uuid
 from functools import wraps
 
+from pydantic import ValidationError
+
 from .excepts import ObjectNotFound, ObjectExistsError
 from .response import ok, failed
 from .log import logger
