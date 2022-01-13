@@ -3,9 +3,9 @@ SET NAMES utf8mb4;
 
 # ------------------------------------------------------------
 
-# DROP TABLE IF EXISTS `city`;
+# DROP TABLE IF EXISTS `ty_city`;
 #
-# CREATE TABLE `city` (
+# CREATE TABLE `ty_city` (
 #   `id` int(11) NOT NULL AUTO_INCREMENT,
 #   `country_id` int(8) DEFAULT NULL COMMENT '城市所在的国家对应的id',
 #   `state` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '省或者州的英文名称,若某国家没有这一个行政级别,则为空',
@@ -20,10 +20,10 @@ SET NAMES utf8mb4;
 #   KEY `idx_city_name` (`name`(255))
 # ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-LOCK TABLES `city` WRITE;
-/*!40000 ALTER TABLE `city` DISABLE KEYS */;
+LOCK TABLES `ty_city` WRITE;
+/*!40000 ALTER TABLE `ty_city` DISABLE KEYS */;
 
-INSERT INTO `city` (`id`, `country_id`, `state`, `name`, `lower_name`, `cn_state`, `cn_city`, `city_code`, `family_income`, `state_code`)
+INSERT INTO `ty_city` (`id`, `country_id`, `state`, `name`, `lower_name`, `cn_state`, `cn_city`, `city_code`, `family_income`, `state_code`)
 VALUES
 	(1,156,NULL,'Elbasan','elbasan',NULL,'爱尔巴桑','EL',0,NULL),
 	(2,156,NULL,'Diber','diber',NULL,'迪勃拉','DI',0,NULL),
@@ -3866,7 +3866,7 @@ VALUES
 	(3839,NULL,NULL,'Kemmlitz',NULL,NULL,NULL,NULL,0,NULL),
 	(3840,NULL,NULL,'San Bernardino',NULL,NULL,NULL,NULL,0,NULL);
 
-INSERT INTO `city` (`id`, `country_id`, `state`, `name`, `lower_name`, `cn_state`, `cn_city`, `city_code`, `family_income`, `state_code`)
+INSERT INTO `ty_city` (`id`, `country_id`, `state`, `name`, `lower_name`, `cn_state`, `cn_city`, `city_code`, `family_income`, `state_code`)
 VALUES
 	(3841,NULL,NULL,'Mattighofen',NULL,NULL,NULL,NULL,0,NULL),
 	(3842,NULL,NULL,'California City',NULL,NULL,NULL,NULL,0,NULL),
@@ -6816,5 +6816,5 @@ VALUES
 	(6786,NULL,NULL,'Woburn',NULL,NULL,NULL,NULL,0,NULL),
 	(6787,NULL,NULL,'Nowhere',NULL,NULL,NULL,NULL,0,NULL);
 
-/*!40000 ALTER TABLE `city` ENABLE KEYS */;
+/*!40000 ALTER TABLE `ty_city` ENABLE KEYS */;
 UNLOCK TABLES;

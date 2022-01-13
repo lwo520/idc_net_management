@@ -2,9 +2,9 @@ SET NAMES utf8mb4;
 
 # ------------------------------------------------------------
 
-# DROP TABLE IF EXISTS `country`;
+# DROP TABLE IF EXISTS `ty_country`;
 #
-# CREATE TABLE `country` (
+# CREATE TABLE `ty_country` (
 #   `id` int(11) NOT NULL AUTO_INCREMENT,
 #   `continent_id` int(16) DEFAULT NULL COMMENT '国家所在的七大洲对应的id,对应于表continent的主键',
 #   `name` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '国家英文常用标准名称，主要用于显示',
@@ -19,10 +19,10 @@ SET NAMES utf8mb4;
 #   PRIMARY KEY (`id`)
 # ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-LOCK TABLES `country` WRITE;
-/*!40000 ALTER TABLE `country` DISABLE KEYS */;
+LOCK TABLES `ty_country` WRITE;
+/*!40000 ALTER TABLE `ty_country` DISABLE KEYS */;
 
-INSERT INTO `country` (`id`, `continent_id`, `name`, `lower_name`, `country_code`, `full_name`, `cname`, `full_cname`, `remark`, `fb_country_code`, `lang`)
+INSERT INTO `ty_country` (`id`, `continent_id`, `name`, `lower_name`, `country_code`, `full_name`, `cname`, `full_cname`, `remark`, `fb_country_code`, `lang`)
 VALUES
 	(1,3,'Cameroon','the republic of cameroon','CMR','the Republic of Cameroon','喀麦隆','喀麦隆共和国','喀麦隆共和国（法语：République du Cameroun）通称喀麦隆，是位于非洲中西部的单一制共和国，西方与尼日利亚接壤，东北与东边分别和乍得与中非相靠，南方则与赤道几内亚、加蓬及刚果共和国毗邻。','CM',NULL),
 	(2,3,'Benin','the republic of benin ','BEN','the Republic of Benin ','贝宁','贝宁共和国','贝宁全称：贝宁共和国（法语República Popular do Benin,La République du Bénin）是位于西非中南部的国家，旧名达荷美（Dahomey），前法国殖民地，贝宁（Benin）南濒几内亚湾，东邻尼日利亚，北与尼日尔接壤，西北与布基纳法索相连，西和多哥接壤，海岸线长125公里。全境南北狭长，南窄北宽。南部沿海为宽约100公里的平原。中部为海拔200－400米波状起伏的高原。西北部的阿塔科拉山海拔641米，为全国最高点。','BJ','YO'),
@@ -272,5 +272,5 @@ VALUES
 	(248,2,'Wallis and Futuna Islands','wallis and futuna islands','WF','Wallis and Futuna Islands','瓦利斯和富图纳群岛','法国瓦利斯和富图纳群岛','','WF',NULL),
 	(249,2,'Kosovo','the republic of kosovo','XK','The Republic of Kosovo','科索沃','科索沃共和国','','XK','SQ');
 
-/*!40000 ALTER TABLE `country` ENABLE KEYS */;
+/*!40000 ALTER TABLE `ty_country` ENABLE KEYS */;
 UNLOCK TABLES;
