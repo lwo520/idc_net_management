@@ -1,6 +1,10 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, constr, validator
+
+
+class IntIdList(BaseModel):
+    id_list: List[int]
 
 
 class AddVendor(BaseModel):
@@ -21,13 +25,17 @@ class AddVendor(BaseModel):
 
 class Vendor(BaseModel):
     id: int
-    comp_name: str
-    comp_fullname: str
-    concact: str
-    concact_phone: str
-    receiver: str
-    recv_address: str
-    recv_phone: str
+    comp_name: Optional[constr(max_length=32)] = ''
+    comp_fullname: constr(max_length=64)
+    concact: Optional[constr(max_length=32)] = ''
+    concact_phone: Optional[constr(max_length=32)] = ''
+    receiver: Optional[constr(max_length=32)] = ''
+    recv_address: Optional[constr(max_length=256)] = ''
+    recv_phone: Optional[constr(max_length=32)] = ''
 
     class Config:
         orm_mode = True
+
+
+class VendorDetail(Vendor):
+    idc_list: Optional[List] = []

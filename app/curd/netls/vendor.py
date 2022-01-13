@@ -10,7 +10,7 @@ from app.schema.netls import AddVendor, Vendor
 
 
 @curd_deco
-def add(db: Session, vendor: AddVendor) -> typing.Tuple[bool, Vendor]:
+def add(db: Session, vendor: AddVendor) -> typing.Tuple[bool, int]:
     vendor_dic = vendor.dict()
 
     comp_hash = get_hashcode(vendor_dic['comp_fullname'])
@@ -24,4 +24,4 @@ def add(db: Session, vendor: AddVendor) -> typing.Tuple[bool, Vendor]:
     db.add(vendor_qo)
     db.commit()
     db.refresh(vendor_qo)
-    return True, Vendor.from_orm(vendor_qo)
+    return True, vendor_qo.id
