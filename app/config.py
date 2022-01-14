@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 API_ROUTE = '/v1.1'
 
 # 项目名称
-PROJECT_NAME = 'TY-Test'
+PROJECT_NAME = 'TY-IP管理模块'
 # 项目描述
 PROJ_DESCRIPTION = "天耘IP管理系统，主要是管理IP的使用情况，支持对IP的增删改查，其中新增IP支持根据IP掩码和IP段的新增操作。"
 

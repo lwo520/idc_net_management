@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2f1782deea0ff90cda1fb6f9667e8708e9165e678a75973d182341871d385509"
+            "sha256": "ee0c1bde3d8ac0685d632acaf5b6694681c22aad677509885814d0ca1a71bcbc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -193,7 +193,7 @@
                 "sha256:65a9576a5b2d58ca44d133c42a241905cc45e34d2c06fd5ba2bafa221e5d7b5e",
                 "sha256:766abffff765960fcc18003801f7044eb6755ffae4521c8e8ce8e83b9c9b0668"
             ],
-            "markers": "python_version < '3.8'",
+            "markers": "python_version < '3.9'",
             "version": "==4.8.3"
         },
         "importlib-resources": {
@@ -234,6 +234,13 @@
             ],
             "index": "pypi",
             "version": "==2.2.9"
+        },
+        "pinyin": {
+            "hashes": [
+                "sha256:8842ae53cb7a81c8c3ec03d1cd7dba9aedb20d8d6962aebc620fad74da0868f5"
+            ],
+            "index": "pypi",
+            "version": "==0.4.0"
         },
         "pyasn1": {
             "hashes": [

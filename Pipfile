@@ -13,6 +13,7 @@ pymysql = "*"
 mysql-connector = "*"
 uvicorn = "*"
 alembic = "*"
+pinyin = "*"
 
 [dev-packages]
 

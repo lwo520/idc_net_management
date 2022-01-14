@@ -18,8 +18,7 @@ class VendorModel(Base):
     receiver = Column(String(32), default='', comment='收件人')
     recv_address = Column(String(256), default='', comment='收件地址')
     recv_phone = Column(String(32), default='', comment='收件电话')
-
-    idc_list = relationship('IdcModel', back_populates='vendor')
+    remarks = Column(String(256), default='', comment='备注')
 
 
 class IdcModel(Base):
@@ -30,17 +29,16 @@ class IdcModel(Base):
 
     name = Column(String(64), nullable=False, comment='机房名称')
     address = Column(String(256), default='', comment='机房地址')
-    concact = Column(String(64), default='', comment='联系人')
+    concact = Column(String(32), default='', comment='联系人')
     concact_phone = Column(String(32), default='', comment='联系电话')
     country = Column(String(32), default='', comment='所属国家')
     city = Column(String(64), default='', comment='所属城市')
-    vendor_id = Column(BIGINT, ForeignKey('ty_vendor.id'), comment='供应商ID')
-    receiver = Column(String(64), default='', comment='收件人')
+    vendor_id = Column(BIGINT, default=0, comment='供应商ID')
+    vendor_name = Column(String(64), default='', comment='供应商公司全称')
+    receiver = Column(String(32), default='', comment='收件人')
     recv_address = Column(String(256), default='', comment='收件地址')
     recv_phone = Column(String(20), default='', comment='收件电话')
     remarks = Column(String(256), default='', comment='备注')
-
-    vendor = relationship('VendorModel', back_populates='idc_list')
 
 
 class VlanIdModel(Base):
@@ -50,8 +48,9 @@ class VlanIdModel(Base):
     __tablename__ = 'ty_vlanid'
 
     vlan_id = Column(String(6), nullable=False, comment='1-4096，以及2个特殊的：L3 和BGP')
-    name = Column(String(50), default='', comment='Vlan名称')
+    name = Column(String(32), default='', comment='Vlan名称')
     network = Column(String(64), default='', comment='IP网段')
+    country = Column(String(32), default='', comment='所属国家')
     city = Column(String(64), default='', comment='空或某个机房所属城市')
     remarks = Column(String(256), default='', comment='备注')
 
