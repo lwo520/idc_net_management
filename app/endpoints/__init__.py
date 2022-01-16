@@ -13,3 +13,6 @@ api_v1_router = APIRouter()
 api_v1_router.include_router(vendor.router)
 api_v1_router.include_router(idc.router)
 api_v1_router.include_router(vlanid.router)
+
+# 统计
+api_v1_router.include_router(netls.router)

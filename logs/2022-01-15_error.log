@@ -1,0 +1,10 @@
+2022-01-15 11:38:11.853 | ERROR    | app.core:_wrap:34 - Multiple rows were found when exactly one was required
+2022-01-15 11:38:49.709 | ERROR    | app.core:_wrap:34 - 'list' object has no attribute 'scalar'
+2022-01-15 11:38:53.029 | ERROR    | app.core:_wrap:34 - 'list' object has no attribute 'scalar'
+2022-01-15 11:41:31.605 | ERROR    | app.core:_wrap:34 - 'list' object has no attribute 'scalar'
+2022-01-15 11:42:14.850 | ERROR    | app.core:_wrap:34 - count() takes exactly one argument (0 given)
+2022-01-15 11:42:47.087 | ERROR    | app.core:_wrap:34 - count() takes exactly one argument (0 given)
+2022-01-15 12:34:03.575 | ERROR    | app.core:_wrap:34 - type object 'Vendor' has no attribute 'bm_list'
+2022-01-15 12:46:45.682 | ERROR    | app.core:_wrap:34 - an integer is required (got type str)
+2022-01-15 12:47:20.840 | ERROR    | app.core:_wrap:34 - an integer is required (got type str)
+2022-01-15 12:49:19.799 | ERROR    | app.core:_wrap:34 - an integer is required (got type str)

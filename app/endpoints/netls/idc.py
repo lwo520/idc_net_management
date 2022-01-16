@@ -7,7 +7,7 @@ from app.core import get_db, ok, failed, ObjectExistsError, ObjectNotFound, fail
 from app.errcode import *
 
 from app.curd.netls import idc as idc_curd
-from app.schema.netls import IdcBase, Idc, IdcUpd
+from app.schema.netls import IdcBase, IdcUpd
 
 router = APIRouter(prefix='/netls', tags=['IP-机房管理'])
 
@@ -79,20 +79,18 @@ def get_idc(
         return failed(message='获取机房详情失败')
     if not idc:
         return failed(NotFoundError.code, message='供应商不存在')
-    return ok(data=idc.dict())
+    return ok(data=idc)
 
 
 @router.get('/idc/list/', summary='获取机房列表')
 def list_idcs(
-        name: str = '', vendor_name: str = '',
-        country: str = '', city: str = '',
-        page: int = 0, page_size: int = 10,
-        db: Session = Depends(get_db)
+        name: str = '', vendor_id: int = 0, vendor_name: str = '',
+        country: str = '', city: str = '', page: int = 0,
+        page_size: int = 10, db: Session = Depends(get_db)
 ):
     done, idcs = idc_curd.get_list(
-        db,
-        name.strip(), vendor_name.strip(),
-        country.strip(), city.strip(),
+        db, name.strip(), vendor_id,
+        vendor_name.strip(), country.strip(), city.strip(),
         page, page_size
     )
     if not done:

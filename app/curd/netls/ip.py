@@ -43,7 +43,7 @@ def parse_ip_range(ip_range: str) -> typing.Tuple[bool, typing.Any]:
     return True, range_
 
 
-def get_ipinfo(db: Session, ip: str) -> typing.Any:
+def get(db: Session, ip: str) -> typing.Any:
     """
     # 查询IP信息
     :param db: 会话实例
@@ -59,7 +59,7 @@ def get_ipinfo(db: Session, ip: str) -> typing.Any:
         ipinfo = {
             'ipcode': qobj.ipcode,
             'ip': ip,
-            'is_used': qobj.is_used,
+            'is_used': qobj.is_assigned,
             'clientid': qobj.clientid,
             'netmask': qobj.netmask
         }
@@ -84,7 +84,7 @@ def get_ipinfo_list(
     :param page_size: 页容量
     """
     entities = (
-        IpInfoModel.ipcode, IpInfoModel.ip, IpInfoModel.is_used,
+        IpInfoModel.ipcode, IpInfoModel.ip, IpInfoModel.is_assigned,
         IpInfoModel.clientid, IpInfoModel.netmask
     )
     conditions = []
@@ -93,7 +93,7 @@ def get_ipinfo_list(
     if clientid is not None and clientid > 0:
         conditions.append(IpInfoModel.clientid == clientid)
     if is_used is not None:
-        conditions.append(IpInfoModel.is_used == is_used)
+        conditions.append(IpInfoModel.is_assigned == is_used)
     ipcode_range = []
     # 处理IP子网掩码和IP区间两种查询情况
     parse_func = parse_sub_network if network else parse_ip_range if ip_range else None
@@ -111,7 +111,7 @@ def get_ipinfo_list(
     result = qobjs.all()
     ipinfo_list = [
         {'ipcode': o.ipcode, 'ip': o.ip, 'clientid': o.clientid,
-         'is_used': o.is_used}
+         'is_used': o.is_assigned}
         for o in result
     ]
     # 查询数量

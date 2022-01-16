@@ -52,6 +52,8 @@ class VlanIdModel(Base):
     network = Column(String(64), default='', comment='IP网段')
     country = Column(String(32), default='', comment='所属国家')
     city = Column(String(64), default='', comment='空或某个机房所属城市')
+    idc_id = Column(BIGINT, default=0, comment='机房ID')
+    idc_name = Column(String(64), default='', comment='机房名称')
     remarks = Column(String(256), default='', comment='备注')
 
 
@@ -64,14 +66,17 @@ class IPModel(Base):
     vlan_id = Column(String(6), default='', comment='1-4096，以及2个特殊的：L3 和BGP')
     iphash = Column(String(64), unique=True, index=True, comment='IP哈希码')
     flag = Column(SMALLINT, default=0, comment='0-内网，1-公网')
-    ip = Column(String(32), unique=True, comment='IP，支持网段、IP地址、IP范围')
-    is_used = Column(SMALLINT, default=0, comment='是否已被使用，0-否，1-是')
+    ipaddr = Column(String(32), comment='IP，支持网段、IP地址、IP范围')
+    ipver = Column(SMALLINT, default=4, comment='Version，目前只支持IPv4')
+    is_assigned = Column(SMALLINT, default=0, comment='是否已被使用，0-否，1-是')
+    idc_id = Column(BIGINT, default=0, comment='机房ID')
+    idc_name = Column(String(64), default='', comment='机房名称')
     idc_device = Column(String(64), default='', comment='IDC设备')
     idc_dev_port = Column(String(32), default='', comment='IDC设备关联端口')
     relate_inf = Column(String(32), default='', comment='关联界面')
     ip_owner = Column(String(64), default='', comment='IP所有者')
     dns = Column(String(32), default='8.8.8.8', comment='DNS')
-    assignment = Column(String(128), default='', comment='IP分配与作用')
+    assignment = Column(String(128), default='', comment='IP分配信息')
     netmask = Column(INT, default=24, comment='子网掩码')
     remarks = Column(String(256), default='', comment='备注')
 
@@ -82,6 +87,6 @@ class IpExpandModel(Base):
     """
     __tablename__ = 'ty_ipaddr_expand'
 
-    iphash = Column(String(64), ForeignKey('ty_ipaddr.iphash'), comment='IP哈希码')
+    ipaddr_id = Column(BIGINT, ForeignKey('ty_ipaddr.id'), comment='IP_ID')
     ipaddr = Column(String(32), comment='IP地址')
     is_used = Column(SMALLINT, default=0, comment='是否已被使用，0-否，1-是')

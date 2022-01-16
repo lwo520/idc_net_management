@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from app.core import curd_ac_deco, get_hashcode, trans_qo_ts, upd_qo_attrs
+from app.core import curd_ac_deco, get_hashcode, update_qo
 from app.core.excepts import ObjectExistsError, ObjectNotFound
 from app.models.netls import VendorModel, IdcModel
 from app.schema.netls import VendorBase, Vendor, VendorDetail
@@ -58,7 +58,7 @@ def update(db: Session, vendor: Vendor) -> typing.Tuple[bool, Any]:
     if vendor.comp_fullname:
         db.query(IdcModel).filter(IdcModel.vendor_id == qobj.id).\
             update({'vendor_name': vendor.comp_fullname}, synchronize_session=False)
-    upd_qo_attrs(qobj, vendor)
+    update_qo(qobj, vendor)
     db.commit()
     return True, None
 
@@ -67,7 +67,9 @@ def update(db: Session, vendor: Vendor) -> typing.Tuple[bool, Any]:
 def get(db: Session, id: int) -> typing.Tuple[bool, Any]:
     qobj = db.query(VendorModel).filter(VendorModel.id == id).first()
     if qobj:
-        return True, VendorDetail.from_orm(trans_qo_ts(qobj))
+        idc_qos = db.query(IdcModel).filter(IdcModel.vendor_id == qobj.id).all()
+        setattr(qobj, 'idc_list', idc_qos)
+        return True, VendorDetail.from_orm(qobj)
     return True, None
 
 
@@ -83,4 +85,10 @@ def get_list(db: Session, comp_name: str, comp_fullname: str,
         offset_pos = (page - 1) * page_size
         qobjs = qobjs.offset(offset_pos).limit(page_size)
     qobjs = qobjs.all()
-    return True, [Vendor.from_orm(o).dict() for o in qobjs]
+    return True, Vendor.bm_list(qobjs)
+
+
+@curd_ac_deco
+def statistics(db: Session) -> typing.Tuple[bool, typing.Any]:
+    vendor_cnt = db.query(VendorModel).count()
+    return True, vendor_cnt

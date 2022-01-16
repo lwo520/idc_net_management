@@ -77,7 +77,7 @@ def get_vendor(
         return failed(message='获取供应商详情失败')
     if not vendor:
         return failed(NotFoundError.code, message='供应商不存在')
-    return ok(data=vendor.dict())
+    return ok(data=vendor)
 
 
 @router.get('/vendor/list/', summary='获取供应商列表')

@@ -82,8 +82,8 @@ def get_vlanid(
     if not done:
         return failed(message='获取VlanID详情失败')
     if not vlanid:
-        return failed(NotFoundError.code, message='供应商不存在')
-    return ok(data=vlanid.dict())
+        return failed(NotFoundError.code, message='VlanID不存在')
+    return ok(data=vlanid)
 
 
 @router.get('/vlanid/list/', summary='获取VlanID列表')

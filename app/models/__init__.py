@@ -1,5 +1,5 @@
 import time
-from sqlalchemy import Column, BIGINT
+from sqlalchemy import Column, BIGINT, String
 from sqlalchemy.orm import as_declarative, declared_attr
 
 
@@ -21,5 +21,7 @@ class Base:
 
     # 通用的字段
     id = Column(BIGINT, primary_key=True, index=True, autoincrement=True)
-    created_time = Column(BIGINT, default=now_ts(), comment="创建时间")
-    updated_time = Column(BIGINT, default=now_ts(), onupdate=now_ts, comment="更新时间")
+    created_by = Column(BIGINT, default=0, comment='创建者ID，Ogcloud用户ID')
+    created_at = Column(BIGINT, default=now_ts(), comment="创建时间")
+    updated_by = Column(BIGINT, default=0, comment='更新者ID，Ogcloud用户ID')
+    updated_at = Column(BIGINT, default=now_ts(), onupdate=now_ts, comment="更新时间")

@@ -38,26 +38,7 @@ def curd_ac_deco(curd_f):
     return _wrap
 
 
-def str_ts(ts):
-    return dt.strftime(dt.fromtimestamp(ts), '%Y-%m-%d %H:%M:%S')
-
-
-def trans_qo_ts(qo, k: str = None):
-    if k is None:
-        v = getattr(qo, 'created_time', 0)
-        if v > 0:
-            setattr(qo, 'created_time', str_ts(v))
-        v = getattr(qo, 'updated_time', 0)
-        if v > 0:
-            setattr(qo, 'updated_time', str_ts(v))
-    else:
-        v = getattr(qo, k, 0)
-        if v > 0:
-            setattr(qo, k, str_ts(v))
-    return qo
-
-
-def upd_qo_attrs(qo, qo_dic: typing.Dict):
+def update_qo(qo, qo_dic: typing.Dict):
     for k, v in qo_dic.items():
         if not hasattr(qo, k):
             continue

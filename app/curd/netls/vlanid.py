@@ -2,7 +2,7 @@ import typing
 
 from sqlalchemy.orm import Session
 
-from app.core import ObjectExistsError, ObjectNotFound, curd_ac_deco, trans_qo_ts, upd_qo_attrs
+from app.core import ObjectExistsError, ObjectNotFound, curd_ac_deco, update_qo
 from app.models.netls import VlanIdModel
 from app.schema.netls import VlanIDDetail, VlanID
 
@@ -42,7 +42,7 @@ def update(db: Session, vlanid: typing.Dict) -> typing.Tuple[bool, typing.Any]:
     qobj = db.query(VlanIdModel).filter_by(id=vlanid.pop('id')).first()
     if not qobj:
         raise ObjectNotFound('VlanID对象不存在')
-    upd_qo_attrs(qobj, vlanid)
+    update_qo(qobj, vlanid)
     db.commit()
     return True, None
 
@@ -51,7 +51,7 @@ def update(db: Session, vlanid: typing.Dict) -> typing.Tuple[bool, typing.Any]:
 def get(db: Session, id: int) -> typing.Tuple[bool, typing.Any]:
     qobj = db.query(VlanIdModel).filter(VlanIdModel.id == id).first()
     if qobj:
-        return True, VlanIDDetail.from_orm(trans_qo_ts(qobj))
+        return True, VlanIDDetail.from_orm(qobj)
     return True, None
 
 
@@ -76,4 +76,10 @@ def get_list(
         offset_pos = (page - 1) * page_size
         qobjs = qobjs.offset(offset_pos).limit(page_size)
     qobjs = qobjs.all()
-    return True, [VlanID.from_orm(o).dict() for o in qobjs]
+    return True, [VlanID.from_orm(o) for o in qobjs]
+
+
+@curd_ac_deco
+def statistics(db: Session) -> typing.Tuple[bool, typing.Any]:
+    vlanid_cnt = db.query(VlanIdModel).count()
+    return True, vlanid_cnt
