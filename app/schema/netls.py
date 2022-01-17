@@ -282,17 +282,8 @@ class IpAddrBase(IPBase):
     idc_name: Optional[str] = Field(
         default='', max_length=64, description='所属机房名称'
     )
-    idc_device: Optional[str] = Field(
-        default='', max_length=64, description='IDC设备'
-    )
-    idc_dev_port: Optional[str] = Field(
-        default='', max_length=32, description='IDC设备关联端口'
-    )
-    relate_inf: Optional[str] = Field(
-        default='', max_length=32, description='关联界面'
-    )
     ip_owner: Optional[str] = Field(
-        default='', max_length=64, description='IP所有者'
+        default='', max_length=64, description='IP归属'
     )
     dns: Optional[str] = Field(
         default='8.8.8.8', max_length=32, description='DNS'
@@ -303,7 +294,7 @@ class IpAddrBase(IPBase):
 
 
 class IpAddrDetail(IpAddrBase):
-    id: Optional[int] = Field(description='ID')
+    id: int = Field(description='ID')
 
     ipver: Optional[int] = Field(default=4, description='IP版本')
     netmask: Optional[int] = Field(default=24, description='子网掩码')
@@ -319,6 +310,8 @@ class IpAddrDetail(IpAddrBase):
 
 
 class IpAddr(BaseModel):
+    id: int = Field(description='ID')
+
     vlan_id: Optional[str] = Field(
         default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
@@ -337,17 +330,8 @@ class IpAddr(BaseModel):
     idc_name: Optional[str] = Field(
         default='', max_length=64, description='所属机房名称'
     )
-    idc_device: Optional[str] = Field(
-        default='', max_length=64, description='IDC设备'
-    )
-    idc_dev_port: Optional[str] = Field(
-        default='', max_length=32, description='IDC设备关联端口'
-    )
-    relate_inf: Optional[str] = Field(
-        default='', max_length=32, description='关联界面'
-    )
     ip_owner: Optional[str] = Field(
-        default='', max_length=64, description='IP所有者'
+        default='', max_length=64, description='IP归属'
     )
     dns: Optional[str] = Field(
         default='8.8.8.8', max_length=32, description='DNS'
@@ -359,3 +343,15 @@ class IpAddr(BaseModel):
 
 class IpAddrUpd(IpAddrBase):
     id: int = Field(description='')
+
+
+class IpAddrExpand(BaseModel):
+    relate_inf: Optional[str] = Field(
+        default='', max_length=32, description='关联界面'
+    )
+    idc_device: Optional[str] = Field(
+        default='', max_length=64, description='IDC设备'
+    )
+    idc_dev_port: Optional[str] = Field(
+        default='', max_length=32, description='IDC设备关联端口'
+    )

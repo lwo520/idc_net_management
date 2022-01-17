@@ -6,9 +6,6 @@ from fastapi import APIRouter, Depends
 from app.core import get_db, ok, failed, failed_errcode
 from app.errcode import *
 
-router = APIRouter(prefix='netls', tags=['IP-IP地址管理'])
-
-
 @router.get('/ip/', summary='查询IP详情')
 async def get_ip(db: Session = Depends(get_db), *, ip: str):
     """
