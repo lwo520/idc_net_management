@@ -64,7 +64,7 @@ class IPModel(Base):
     __tablename__ = 'ty_ipaddr'
 
     vlan_id = Column(String(6), default='', comment='1-4096，以及2个特殊的：L3 和BGP')
-    iphash = Column(String(64), unique=True, index=True, comment='IP哈希码')
+    iphash = Column(String(64), index=True, comment='IP哈希码')
     ipaddr = Column(String(32), comment='IP，支持网段、IP地址、IP范围')
     flag = Column(SMALLINT, default=0, comment='IP标志，0-内网，1-公网')
     ipver = Column(SMALLINT, default=4, comment='Version，目前只支持IPv4')
