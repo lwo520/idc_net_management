@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core import ObjectExistsError, curd_ac_deco, ObjectNotFound, update_qo
 from app.models.netls import IPAddrModel, IPExpandModel
-from app.schema.netls import IPAddrDetail, IPAddrExpandDetail, IPAddrQuery, IPAddr
+from app.schema.netls import IPAddrDetail, IPAddrExpandDetail, IPAddrQuery, IPAddr, IPAddrExpandQuery, IPAddrExpand
 
 
 @curd_ac_deco
@@ -165,31 +165,62 @@ def get(db: Session, id: int, expand: bool = False):
 
 
 @curd_ac_deco
-def get_list(db: Session, q_sch: IPAddrQuery) -> typing.Tuple[bool, typing.List]:
+def get_list(db: Session, sch: IPAddrQuery) -> typing.Tuple[bool, typing.List]:
     """
     查询IP资源列表
     """
-    qobjs = db.query(IPAddrModel)
+    conditions = []
 
-    if q_sch.vlan_id and q_sch.vlan_id.strip():
-        qobjs = qobjs.filter(IPAddrModel.vlan_id == q_sch.vlan_id.strip())
-    if q_sch.flag != -1:
-        qobjs = qobjs.filter(IPAddrModel.flag == q_sch.flag)
-    if q_sch.is_assigned:
-        qobjs = qobjs.filter(IPAddrModel.is_assigned == q_sch.is_assigned)
-    if q_sch.ipaddr and q_sch.ipaddr.strip():
-        ipaddr = q_sch.ipaddr.strip()
-        qobjs = qobjs.filter(IPAddrModel.ipaddr.like(f"%{ipaddr}%"))
-    if q_sch.idc_name and q_sch.idc_name.strip():
-        idc_name = q_sch.idc_name.strip()
-        qobjs = qobjs.filter(IPAddrModel.idc_name.like(f"%{idc_name}%"))
-    if q_sch.assignment and q_sch.assignment.strip():
-        assignment = q_sch.assignment.strip()
-        qobjs = qobjs.filter(IPAddrModel.assignment.like(f"%{assignment}%"))
-    if q_sch.ip_owner and q_sch.ip_owner.strip():
-        qobjs = qobjs.filter(IPAddrModel.ip_owner == q_sch.ip_owner.strip())
-    if q_sch.page > 0:
-        offset_pos = (q_sch.page - 1) * q_sch.page_size
-        qobjs = qobjs.offset(offset_pos).limit(q_sch.page_size)
+    if sch.vlan_id and sch.vlan_id.strip():
+        conditions.append(IPAddrModel.vlan_id == sch.vlan_id.strip())
+    if sch.flag != -1:
+        conditions.append(IPAddrModel.flag == sch.flag)
+    if sch.is_assigned > -1:
+        conditions.append(IPAddrModel.is_assigned == sch.is_assigned)
+    if sch.ipaddr.strip():
+        conditions.append(IPAddrModel.ipaddr.like(f"%{sch.ipaddr.strip()}%"))
+    if sch.idc_name.strip():
+        conditions.append(IPAddrModel.idc_name.like(f"%{sch.idc_name.strip()}%"))
+    if sch.assignment.strip():
+        conditions.append(IPAddrModel.assignment.like(f"%{sch.assignment.strip()}%"))
+    if sch.ip_owner.strip():
+        conditions.append(IPAddrModel.ip_owner == sch.ip_owner.strip())
+
+    qobjs = db.query(IPAddrModel).filter(*conditions)
+    qobjs = qobjs.group_by(IPAddrModel.vlan_id).order_by(IPAddrModel.created_at.desc())
+    if sch.page > 0:
+        offset_pos = (sch.page - 1) * sch.page_size
+        qobjs = qobjs.offset(offset_pos).limit(sch.page_size)
 
     return True, [IPAddr.from_orm(qo) for qo in qobjs.all()]
+
+
+@curd_ac_deco
+def get_expand_list(db: Session, sch: IPAddrExpandQuery) -> typing.Tuple[bool, typing.List]:
+    """
+    查询IP资源对应IP地址列表
+    """
+    conditions = []
+
+    if sch.ipaddr_id > 0:
+        conditions.append(IPExpandModel.ipaddr_id == sch.ipaddr_id)
+    if sch.ipaddr.strip():
+        conditions.append(IPAddrModel.ipaddr.like(f"%{sch.ipaddr.strip()}%"))
+    if sch.is_assigned > -1:
+        conditions.append(IPAddrModel.is_assigned == sch.is_assigned)
+    if sch.assignment.strip():
+        conditions.append(IPAddrModel.assignment.like(f"%{sch.assignment.strip()}%"))
+    if sch.idc_device.strip():
+        conditions.append(IPAddrModel.assignment.like(f"%{sch.idc_device.strip()}%"))
+    if sch.idc_dev_port.strip():
+        conditions.append(IPAddrModel.assignment.like(f"%{sch.idc_dev_port.strip()}%"))
+    if sch.relate_inf.strip():
+        conditions.append(IPAddrModel.assignment.like(f"%{sch.relate_inf.strip()}%"))
+
+    qobjs = db.query(IPExpandModel).filter(*conditions)
+    qobjs.group_by(IPExpandModel.ipaddr_id).order_by(IPAddrModel.created_at.desc())
+    if sch.page > 0:
+        offset_pos = (sch.page - 1) * sch.page_size
+        qobjs = qobjs.offset(offset_pos).limit(sch.page_size)
+
+    return True, [IPAddrExpand.from_orm(qo) for qo in qobjs.all()]

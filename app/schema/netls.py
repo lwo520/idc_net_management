@@ -322,13 +322,13 @@ class IPAddrQuery(IPBase):
         default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
     flag: Optional[int] = Field(
-        default=-1, ge=-1, le=1, description='网络标志，0-内网，1-公网'
+        default=NetFlagEnum.inner, ge=0, le=1, description='网络标志，0-内网，1-公网'
     )
     ipaddr: Optional[str] = Field(
         default='', max_length=32, description='IP，支持网段、IP地址、IP范围'
     )
     is_assigned: Optional[int] = Field(
-        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
+        default=-1, description='是否已分配使用，0-否，1-是'
     )
     assignment: Optional[str] = Field(
         default='', max_length=128, description='IP分配信息'
@@ -388,12 +388,10 @@ class IPAddrUpd(IPBase):
         orm_mode = True
 
 
-class IpAddrExpand(IPBase):
+class IPAddrExpand(IPBase):
     id: int = Field(description='ID')
+    ipaddr: Optional[str] = Field(max_length=32, description='IP地址')
 
-    ipaddr: Optional[str] = Field(
-        max_length=32, description='IP，支持网段、IP地址、IP范围'
-    )
     is_assigned: Optional[int] = Field(
         default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
     )
@@ -414,7 +412,7 @@ class IpAddrExpand(IPBase):
         orm_mode = True
 
 
-class IpAddrExpandUpd(IPBase):
+class IPAddrExpandUpd(IPBase):
     id: int = Field(description='ID')
 
     is_assigned: Optional[int] = Field(
@@ -436,19 +434,19 @@ class IpAddrExpandUpd(IPBase):
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
 
-class IPAddrExpandDetail(IpAddrExpand):
+class IPAddrExpandDetail(IPAddrExpand):
     created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     created_at: Optional[str] = Field(default='', description='创建时间')
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     updated_at: Optional[str] = Field(default='', description='更新时间')
 
-    class Config:
-        orm_mode = True
 
+class IPAddrExpandQuery(IPBase):
+    ipaddr_id: Optional[int] = Field(default=0, description='IP资源ID')
+    ipaddr: Optional[str] = Field(max_length=32, description='IP地址')
 
-class IpAddrExpandQuery(IPBase):
     is_assigned: Optional[int] = Field(
-        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
+        default=-1, description='是否已分配使用，0-否，1-是'
     )
     assignment: Optional[str] = Field(
         default='', max_length=128, description='IP分配信息'
@@ -462,3 +460,6 @@ class IpAddrExpandQuery(IPBase):
     idc_dev_port: Optional[str] = Field(
         default='', max_length=32, description='IDC设备关联端口'
     )
+
+    page: Optional[int] = Field(default=0, description='页码')
+    page_size: Optional[int] = Field(default=00, description='页容量')

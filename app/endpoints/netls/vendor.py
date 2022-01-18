@@ -27,7 +27,7 @@ async def add_vendor(
 
 
 @router.delete('/vendor/', summary='删除供应商')
-def delete_vendor(
+async def delete_vendor(
         id: int,
         db: Session = Depends(get_db)
 ):
@@ -40,7 +40,7 @@ def delete_vendor(
 
 
 @router.delete('/vendor/list', summary='批量删除供应商')
-def delete_vendors(
+async def delete_vendors(
         id_list: typing.List[int],
         db: Session = Depends(get_db)
 ):
@@ -53,7 +53,7 @@ def delete_vendors(
 
 
 @router.put('/vendor/', summary='更新供应商')
-def update_vendor(
+async def update_vendor(
         vendor: Vendor,
         db: Session = Depends(get_db)
 ):
@@ -69,7 +69,7 @@ def update_vendor(
 
 
 @router.get('/vendor/', summary='获取供应商详情')
-def get_vendor(
+async def get_vendor(
         id: int,
         db: Session = Depends(get_db)
 ):
@@ -84,7 +84,7 @@ def get_vendor(
 
 
 @router.get('/vendor/list/', summary='获取供应商列表')
-def list_vendors(
+async def list_vendors(
         comp_name: str = '', comp_fullname: str = '',
         page: int = 0, page_size: int = 10,
         db: Session = Depends(get_db)

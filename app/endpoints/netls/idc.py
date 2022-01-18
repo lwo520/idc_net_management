@@ -13,7 +13,7 @@ router = APIRouter(prefix='/netls', tags=['IP-机房管理'])
 
 
 @router.post('/idc/add', summary='添加机房')
-def add_idc(
+async def add_idc(
         idc: IdcAdd,
         db: Session = Depends(get_db)
 ):
@@ -29,7 +29,7 @@ def add_idc(
 
 
 @router.delete('/idc/', summary='删除机房')
-def delete_idc(
+async def delete_idc(
         id: int,
         db: Session = Depends(get_db)
 ):
@@ -42,7 +42,7 @@ def delete_idc(
 
 
 @router.delete('/idc/list', summary='批量删除机房')
-def delete_idcs(
+async def delete_idcs(
         id_list: typing.List[int],
         db: Session = Depends(get_db)
 ):
@@ -55,7 +55,7 @@ def delete_idcs(
 
 
 @router.put('/idc/', summary='更新机房')
-def update_idc(
+async def update_idc(
         idc: IdcUpd,
         db: Session = Depends(get_db)
 ):
@@ -68,7 +68,7 @@ def update_idc(
 
 
 @router.get('/idc/', summary='获取机房详情')
-def get_idc(
+async def get_idc(
         id: int,
         db: Session = Depends(get_db)
 ):
@@ -83,7 +83,7 @@ def get_idc(
 
 
 @router.get('/idc/list/', summary='获取机房列表')
-def list_idcs(
+async def list_idcs(
         name: str = '', vendor_id: int = 0, vendor_name: str = '',
         country: str = '', city: str = '', page: int = 0,
         page_size: int = 10, db: Session = Depends(get_db)

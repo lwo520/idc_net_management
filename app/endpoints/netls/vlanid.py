@@ -13,7 +13,7 @@ router = APIRouter(prefix='/netls', tags=['IP-VlanID'])
 
 
 @router.post('/vlanid/add', summary='添加VlanID')
-def add_vlanid(
+async def add_vlanid(
         vlanid: VlanidAdd,
         db: Session = Depends(get_db)
 ):
@@ -33,7 +33,7 @@ def add_vlanid(
 
 
 @router.delete('/vlanid/', summary='删除VlanID')
-def delete_vlanid(
+async def delete_vlanid(
         id: int,
         db: Session = Depends(get_db)
 ):
@@ -46,7 +46,7 @@ def delete_vlanid(
 
 
 @router.delete('/vlanid/list', summary='批量删除VlanID')
-def delete_vlanids(
+async def delete_vlanids(
         id_list: typing.List[int],
         db: Session = Depends(get_db)
 ):
@@ -59,7 +59,7 @@ def delete_vlanids(
 
 
 @router.put('/vlanid/', summary='更新VlanID')
-def update_vlanid(
+async def update_vlanid(
         vlanid: VlanID,
         db: Session = Depends(get_db)
 ):
@@ -72,7 +72,7 @@ def update_vlanid(
 
 
 @router.get('/vlanid/', summary='获取VlanID详情')
-def get_vlanid(
+async def get_vlanid(
         id: int,
         db: Session = Depends(get_db)
 ):
@@ -87,7 +87,7 @@ def get_vlanid(
 
 
 @router.get('/vlanid/list/', summary='获取VlanID列表')
-def list_vlanids(
+async def list_vlanids(
         vlan_id: str = '', name: str = '', network: str = '',
         country: str = '', city: str = '',
         page: int = 0, page_size: int = 10,
