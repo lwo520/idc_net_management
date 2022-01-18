@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core import get_db, ok, failed, ObjectExistsError, ObjectNotFound, failed_errcode
 from app.errcode import *
-from app.schema.netls import VlanIDBase, VlanID
+from app.schema.netls import VlanidAdd, VlanID
 from app.curd.netls import vlanid as vlanid_curd
 
 router = APIRouter(prefix='/netls', tags=['IP-VlanID'])
@@ -14,7 +14,7 @@ router = APIRouter(prefix='/netls', tags=['IP-VlanID'])
 
 @router.post('/vlanid/add', summary='添加VlanID')
 def add_vlanid(
-        vlanid: VlanIDBase,
+        vlanid: VlanidAdd,
         db: Session = Depends(get_db)
 ):
     if not (vlanid.vlan_id and vlanid.vlan_id.strip()):

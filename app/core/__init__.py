@@ -3,7 +3,6 @@ import typing
 import uuid
 
 from functools import wraps
-from datetime import datetime as dt
 
 from .excepts import ObjectNotFound, ObjectExistsError
 from .response import ok, failed, failed_errcode

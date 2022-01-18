@@ -4,10 +4,11 @@ from datetime import datetime as dt
 
 from pydantic import BaseModel, validator, Field
 
-from app.enums import NetFlagEnum
+from app.enums import NetFlagEnum, AssignedEnum
 
 
 class IPBase(BaseModel):
+
     @staticmethod
     def _str_ts(ts: typing.Union[int, str]) -> str:
         try:
@@ -58,9 +59,6 @@ class VendorBase(IPBase):
     recv_phone: Optional[str] = Field(
         default='', max_length=32, description='收件电话'
     )
-    created_by: Optional[str] = Field(
-        default='', max_length=64, description='创建者，非本地用户信息，故显示名称'
-    )
     remarks: Optional[str] = Field(
         default='', max_length=256, description='备注'
     )
@@ -72,8 +70,14 @@ class VendorBase(IPBase):
         return v
 
 
+class VendorAdd(VendorBase):
+    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+
+
 class Vendor(IPBase):
-    id: Optional[int] = Field(description='供应商ID')
+    id: int = Field(description='供应商ID')
+
     comp_name: Optional[str] = Field(
         default='', max_length=32, description='公司名称（简称）'
     )
@@ -105,7 +109,8 @@ class Vendor(IPBase):
 
 class VendorDetail(VendorBase):
     id: Optional[int] = Field(description='供应商ID')
-    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
+
+    created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     created_at: Optional[str] = Field(default='', description='创建时间')
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     updated_at: Optional[str] = Field(default='', description='更新时间')
@@ -149,16 +154,19 @@ class IdcBase(IPBase):
     recv_phone: Optional[str] = Field(
         default='', max_length=32, description='收件电话'
     )
-    created_by: Optional[str] = Field(
-        default='', max_length=64, description='创建者，非本地用户信息，故显示名称'
-    )
     remarks: Optional[str] = Field(
         default='', max_length=256, description='备注'
     )
 
 
+class IdcAdd(IdcBase):
+    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+
+
 class IdcUpd(IdcBase):
     id: int = Field(description='机房ID')
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
 
 class Idc(IPBase):
@@ -190,7 +198,7 @@ class IdcDetail(IdcUpd):
     vendor_name: Optional[str] = Field(
         default='', max_length=64, description='供应商公司全名'
     )
-    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
+    created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     created_at: Optional[str] = Field(default='', description='创建时间')
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     updated_at: Optional[str] = Field(default='', description='更新时间')
@@ -199,7 +207,7 @@ class IdcDetail(IdcUpd):
         orm_mode = True
 
 
-class VlanIDBase(IPBase):
+class VlanidBase(IPBase):
     vlan_id: str = Field(
         max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
@@ -221,12 +229,14 @@ class VlanIDBase(IPBase):
     # id_name: Optional[str] = Field(
     #     default='', max_length=64, description='所属机房名称'
     # )
-    created_by: Optional[str] = Field(
-        default='', max_length=64, description='创建者，非本地用户信息，故显示名称'
-    )
     remarks: Optional[str] = Field(
         default='', max_length=256, description='备注'
     )
+
+
+class VlanidAdd(VlanidBase):
+    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
 
 class VlanID(IPBase):
@@ -246,14 +256,16 @@ class VlanID(IPBase):
     # id_name: Optional[str] = Field(
     #     default='', max_length=64, description='所属机房名称'
     # )
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
     class Config:
         orm_mode = True
 
 
-class VlanIDDetail(VlanIDBase):
+class VlanidDetail(VlanidBase):
     id: Optional[int] = Field(description='ID')
-    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
+
+    created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     created_at: Optional[str] = Field(default='', description='创建时间')
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     updated_at: Optional[str] = Field(default='', description='更新时间')
@@ -262,18 +274,18 @@ class VlanIDDetail(VlanIDBase):
         orm_mode = True
 
 
-class IpAddrBase(IPBase):
+class IPAddrBase(IPBase):
     vlan_id: Optional[str] = Field(
         default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
     flag: Optional[int] = Field(
-        default=NetFlagEnum.inner, description='网络标志，0-内网，1-公网'
+        default=NetFlagEnum.inner, ge=0, le=1, description='网络标志，0-内网，1-公网'
     )
     ipaddr: Optional[str] = Field(
         max_length=32, description='IP，支持网段、IP地址、IP范围'
     )
     is_assigned: Optional[int] = Field(
-        default=0, description='是否已分配使用，0-否，1-是'
+        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
     )
     assignment: Optional[str] = Field(
         default='', max_length=128, description='IP分配信息'
@@ -293,36 +305,30 @@ class IpAddrBase(IPBase):
     )
 
 
-class IpAddrDetail(IpAddrBase):
-    id: int = Field(description='ID')
-
-    ipver: Optional[int] = Field(default=4, description='IP版本')
-    netmask: Optional[int] = Field(default=24, description='子网掩码')
-
-    created_by: Optional[str] = Field(default=0, description='Ogcloud用户ID')
-    created_at: Optional[str] = Field(default='', description='创建时间')
+class IPAddrAdd(IPAddrBase):
+    created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
-    updated_at: Optional[str] = Field(default='', description='更新时间')
 
+
+class IPAddr(IPAddrBase):
+    id: int = Field(description='ID')
 
     class Config:
         orm_mode = True
 
 
-class IpAddr(BaseModel):
-    id: int = Field(description='ID')
-
+class IPAddrQuery(IPBase):
     vlan_id: Optional[str] = Field(
         default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
     flag: Optional[int] = Field(
-        default=NetFlagEnum.inner, description='网络标志，0-内网，1-公网'
+        default=-1, ge=-1, le=1, description='网络标志，0-内网，1-公网'
     )
     ipaddr: Optional[str] = Field(
-        max_length=32, description='IP，支持网段、IP地址、IP范围'
+        default='', max_length=32, description='IP，支持网段、IP地址、IP范围'
     )
     is_assigned: Optional[int] = Field(
-        default=0, description='是否已分配使用，0-否，1-是'
+        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
     )
     assignment: Optional[str] = Field(
         default='', max_length=128, description='IP分配信息'
@@ -336,16 +342,117 @@ class IpAddr(BaseModel):
     dns: Optional[str] = Field(
         default='8.8.8.8', max_length=32, description='DNS'
     )
+    page: Optional[int] = Field(default=0, description='页码')
+    page_size: Optional[int] = Field(default=00, description='页容量')
+
+
+class IPAddrDetail(IPAddr):
+    ipver: Optional[int] = Field(default=4, description='IP版本')
+    netmask: Optional[int] = Field(default=24, description='子网掩码')
+
+    created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+    created_at: Optional[str] = Field(default='', description='创建时间')
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+    updated_at: Optional[str] = Field(default='', description='更新时间')
+
+
+class IPAddrUpd(IPBase):
+    id: int = Field(description='ID')
+
+    vlan_id: Optional[str] = Field(
+        default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
+    )
+    is_assigned: Optional[int] = Field(
+        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
+    )
+    assignment: Optional[str] = Field(
+        default='', max_length=128, description='IP分配信息'
+    )
+    idc_id: Optional[int] = Field(default=0, description='所属机房ID')
+    idc_name: Optional[str] = Field(
+        default='', max_length=64, description='所属机房名称'
+    )
+    ip_owner: Optional[str] = Field(
+        default='', max_length=64, description='IP归属'
+    )
+    dns: Optional[str] = Field(
+        default='8.8.8.8', max_length=32, description='DNS'
+    )
+    remarks: Optional[str] = Field(
+        default='', max_length=256, description='备注'
+    )
+
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
     class Config:
         orm_mode = True
 
 
-class IpAddrUpd(IpAddrBase):
-    id: int = Field(description='')
+class IpAddrExpand(IPBase):
+    id: int = Field(description='ID')
+
+    ipaddr: Optional[str] = Field(
+        max_length=32, description='IP，支持网段、IP地址、IP范围'
+    )
+    is_assigned: Optional[int] = Field(
+        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
+    )
+    assignment: Optional[str] = Field(
+        default='', max_length=128, description='IP分配信息'
+    )
+    relate_inf: Optional[str] = Field(
+        default='', max_length=32, description='关联界面'
+    )
+    idc_device: Optional[str] = Field(
+        default='', max_length=64, description='IDC设备'
+    )
+    idc_dev_port: Optional[str] = Field(
+        default='', max_length=32, description='IDC设备关联端口'
+    )
+
+    class Config:
+        orm_mode = True
 
 
-class IpAddrExpand(BaseModel):
+class IpAddrExpandUpd(IPBase):
+    id: int = Field(description='ID')
+
+    is_assigned: Optional[int] = Field(
+        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
+    )
+    assignment: Optional[str] = Field(
+        default='', max_length=128, description='IP分配信息'
+    )
+    relate_inf: Optional[str] = Field(
+        default='', max_length=32, description='关联界面'
+    )
+    idc_device: Optional[str] = Field(
+        default='', max_length=64, description='IDC设备'
+    )
+    idc_dev_port: Optional[str] = Field(
+        default='', max_length=32, description='IDC设备关联端口'
+    )
+
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+
+
+class IPAddrExpandDetail(IpAddrExpand):
+    created_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+    created_at: Optional[str] = Field(default='', description='创建时间')
+    updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
+    updated_at: Optional[str] = Field(default='', description='更新时间')
+
+    class Config:
+        orm_mode = True
+
+
+class IpAddrExpandQuery(IPBase):
+    is_assigned: Optional[int] = Field(
+        default=AssignedEnum.no, description='是否已分配使用，0-否，1-是'
+    )
+    assignment: Optional[str] = Field(
+        default='', max_length=128, description='IP分配信息'
+    )
     relate_inf: Optional[str] = Field(
         default='', max_length=32, description='关联界面'
     )

@@ -40,6 +40,21 @@ class IdcModel(Base):
     recv_phone = Column(String(20), default='', comment='收件电话')
     remarks = Column(String(256), default='', comment='备注')
 
+    # prods = relationship('IdcDevProdModel', back_populates='idc')
+
+
+# class IdcDevProdModel(Base):
+#     """
+#     机房设备&产品模型
+#     """
+#     __tablename__ = 'ty_idc_dev&prod'
+#
+#     name = Column(String(64), nullable=False, comment='设备&产品名称')
+#     idc_id = Column(BIGINT, ForeignKey('ty_idc.id'), comment='所属机房ID')
+#     remarks = Column(String(256), default='', comment='产品说明')
+#
+#     idc = relationship('IdcModel', back_populates='prods')
+
 
 class VlanIdModel(Base):
     """
@@ -57,7 +72,7 @@ class VlanIdModel(Base):
     remarks = Column(String(256), default='', comment='备注')
 
 
-class IPModel(Base):
+class IPAddrModel(Base):
     """
     IP基础模型
     """
@@ -75,14 +90,17 @@ class IPModel(Base):
     ip_owner = Column(String(64), default='', comment='IP归属')
     dns = Column(String(32), default='8.8.8.8', comment='DNS')
     netmask = Column(INT, default=24, comment='子网掩码')
+    category = Column(SMALLINT, default=0, comment='IP资源类别')
     remarks = Column(String(256), default='', comment='备注')
 
+    expands = relationship('IPExpandModel', back_populates='ip_expand')
 
-class IpExpandModel(Base):
+
+class IPExpandModel(Base):
     """
     IP扩展模型。
     """
-    __tablename__ = 'ty_ipaddr_expand'
+    __tablename__ = 'ty_ipaddr&expand'
 
     ipaddr_id = Column(BIGINT, ForeignKey('ty_ipaddr.id'), comment='IP_ID')
     ipaddr = Column(String(32), comment='IP地址')
@@ -92,3 +110,5 @@ class IpExpandModel(Base):
     relate_inf = Column(String(32), default='', comment='关联网口，内网')
     idc_device = Column(String(64), default='', comment='IDC设备，公网')
     idc_dev_port = Column(String(32), default='', comment='IDC设备关联端口，公网')
+
+    ip_expand = relationship('IPAddrModel', back_populates='expands')

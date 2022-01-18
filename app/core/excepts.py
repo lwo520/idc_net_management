@@ -21,3 +21,8 @@ class ObjectNotFound(BaseError):
 class ObjectExistsError(BaseError):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+
+
+class ParseError(BaseError):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)

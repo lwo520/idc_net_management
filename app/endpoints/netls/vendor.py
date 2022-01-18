@@ -3,9 +3,9 @@ import typing
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 
-from app.core import ok, failed, failed_errcode, get_db, ObjectExistsError
+from app.core import ok, failed, failed_errcode, get_db, ObjectExistsError, ObjectNotFound
 from app.errcode import *
-from app.schema.netls import VendorBase, Vendor
+from app.schema.netls import VendorAdd, Vendor
 from app.curd.netls import vendor as vendor_curd
 
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix='/netls', tags=['IP-供应商管理'])
 
 @router.post('/vendor/', summary='新增供应商')
 async def add_vendor(
-    vendor: VendorBase,
+    vendor: VendorAdd,
     db: Session = Depends(get_db)
 ):
     try:
@@ -59,10 +59,13 @@ def update_vendor(
 ):
     if vendor.id <= 0:
         return failed_errcode(ParamError)
-    done, _ = vendor_curd.update(db, vendor)
-    if not done:
-        return failed(message='更新供应商信息失败')
-    return ok()
+    try:
+        done, _ = vendor_curd.update(db, vendor)
+        if not done:
+            return failed(message='更新供应商信息失败')
+        return ok()
+    except (ObjectExistsError, ObjectNotFound) as e:
+        return failed(message=e.args[0])
 
 
 @router.get('/vendor/', summary='获取供应商详情')

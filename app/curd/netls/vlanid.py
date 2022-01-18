@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core import ObjectExistsError, ObjectNotFound, curd_ac_deco, update_qo
 from app.models.netls import VlanIdModel
-from app.schema.netls import VlanIDDetail, VlanID
+from app.schema.netls import VlanidDetail, VlanID
 
 
 @curd_ac_deco
@@ -51,7 +51,7 @@ def update(db: Session, vlanid: typing.Dict) -> typing.Tuple[bool, typing.Any]:
 def get(db: Session, id: int) -> typing.Tuple[bool, typing.Any]:
     qobj = db.query(VlanIdModel).filter(VlanIdModel.id == id).first()
     if qobj:
-        return True, VlanIDDetail.from_orm(qobj)
+        return True, VlanidDetail.from_orm(qobj)
     return True, None
 
 

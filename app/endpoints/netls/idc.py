@@ -7,14 +7,14 @@ from app.core import get_db, ok, failed, ObjectExistsError, ObjectNotFound, fail
 from app.errcode import *
 
 from app.curd.netls import idc as idc_curd
-from app.schema.netls import IdcBase, IdcUpd
+from app.schema.netls import IdcAdd, IdcUpd
 
 router = APIRouter(prefix='/netls', tags=['IP-机房管理'])
 
 
 @router.post('/idc/add', summary='添加机房')
 def add_idc(
-        idc: IdcBase,
+        idc: IdcAdd,
         db: Session = Depends(get_db)
 ):
     if not (idc.name and idc.name.strip()):

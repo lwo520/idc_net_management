@@ -23,7 +23,7 @@ class NetFlagEnum(IntEnum):
 #     ipv6 = 6
 
 
-class UsedEnum(IntEnum):
+class AssignedEnum(IntEnum):
     """
     是否使用开关枚举
     Attrs:
@@ -32,3 +32,9 @@ class UsedEnum(IntEnum):
     """
     no = 0
     yes = 1
+
+
+class IPCategoryEnum(IntEnum):
+    normal = 0
+    network = 1
+    iprange = 2

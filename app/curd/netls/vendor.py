@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 from app.core import curd_ac_deco, get_hashcode, update_qo
 from app.core.excepts import ObjectExistsError, ObjectNotFound
 from app.models.netls import VendorModel, IdcModel
-from app.schema.netls import VendorBase, Vendor, VendorDetail
+from app.schema.netls import VendorAdd, Vendor, VendorDetail
 
 
 @curd_ac_deco
-def add(db: Session, vendor: VendorBase) -> typing.Tuple[bool, int]:
+def add(db: Session, vendor: VendorAdd) -> typing.Tuple[bool, int]:
     vendor_dic = vendor.dict()
 
     comp_hash = get_hashcode(vendor_dic['comp_fullname'])
@@ -56,6 +56,10 @@ def update(db: Session, vendor: Vendor) -> typing.Tuple[bool, Any]:
     if not qobj:
         raise ObjectNotFound('供应商对象不存在')
     if vendor.comp_fullname:
+        check = db.query(VendorModel).\
+            filter(VendorModel.comp_hash == get_hashcode(vendor.comp_fullname.strip())).first()
+        if check:
+            raise ObjectExistsError('名称为【{}】的供应商已存在'.format(vendor.comp_fullname))
         db.query(IdcModel).filter(IdcModel.vendor_id == qobj.id).\
             update({'vendor_name': vendor.comp_fullname}, synchronize_session=False)
     update_qo(qobj, vendor)
