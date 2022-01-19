@@ -1,43 +1,12 @@
-import typing
 from typing import Optional, List, Any
-from datetime import datetime as dt
 
-from pydantic import BaseModel, validator, Field
+from pydantic import validator, Field
 
 from app.enums import NetFlagEnum, AssignedEnum
+from app.schema import LocBaseModel
 
 
-class IPBase(BaseModel):
-
-    @staticmethod
-    def _str_ts(ts: typing.Union[int, str]) -> str:
-        try:
-            if isinstance(ts, str):
-                ts = int(ts)
-            return dt.strftime(dt.fromtimestamp(ts), '%Y-%m-%d %H:%M:%S')
-        except Exception as e:
-            raise e
-
-    @classmethod
-    def from_orm(cls, qo: typing.Any) -> BaseModel:
-        qo = super().from_orm(qo)
-
-        def trans_ts_attr(keys: typing.List = None):
-            for k in keys or []:
-                if not hasattr(qo, k):
-                    continue
-                v = getattr(qo, k, 0)
-                setattr(qo, k, cls._str_ts(v))
-        trans_ts_attr(['created_at', 'updated_at'])
-
-        return qo
-
-    @classmethod
-    def bm_list(cls, qo_list: typing.List) -> typing.List[BaseModel]:
-        return [cls.from_orm(qo) for qo in qo_list]
-
-
-class VendorBase(IPBase):
+class VendorBase(LocBaseModel):
     comp_name: Optional[str] = Field(
         default='', max_length=32, description='公司名称（简称）'
     )
@@ -75,7 +44,7 @@ class VendorAdd(VendorBase):
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
 
-class Vendor(IPBase):
+class Vendor(LocBaseModel):
     id: int = Field(description='供应商ID')
 
     comp_name: Optional[str] = Field(
@@ -123,7 +92,7 @@ class VendorDetail(VendorBase):
         orm_mode = True
 
 
-class IdcBase(IPBase):
+class IdcBase(LocBaseModel):
     name: str = Field(
         max_length=64, description='机房名称'
     )
@@ -169,7 +138,7 @@ class IdcUpd(IdcBase):
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
 
-class Idc(IPBase):
+class Idc(LocBaseModel):
     id: int = Field(description='机房ID')
     name: str = Field(
         max_length=64, description='机房名称'
@@ -207,7 +176,7 @@ class IdcDetail(IdcUpd):
         orm_mode = True
 
 
-class VlanidBase(IPBase):
+class VlanidBase(LocBaseModel):
     vlan_id: str = Field(
         max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
@@ -239,7 +208,7 @@ class VlanidAdd(VlanidBase):
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
 
 
-class VlanID(IPBase):
+class VlanID(LocBaseModel):
     id: int = Field(description='ID')
     vlan_id: Optional[str] = Field(
         default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
@@ -274,7 +243,7 @@ class VlanidDetail(VlanidBase):
         orm_mode = True
 
 
-class IPAddrBase(IPBase):
+class IPAddrBase(LocBaseModel):
     vlan_id: Optional[str] = Field(
         default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
     )
@@ -317,35 +286,6 @@ class IPAddr(IPAddrBase):
         orm_mode = True
 
 
-class IPAddrQuery(IPBase):
-    vlan_id: Optional[str] = Field(
-        default='', max_length=6, description='数字1-4096，以及2个特殊的：L3 和BGP'
-    )
-    flag: Optional[int] = Field(
-        default=NetFlagEnum.inner, ge=0, le=1, description='网络标志，0-内网，1-公网'
-    )
-    ipaddr: Optional[str] = Field(
-        default='', max_length=32, description='IP，支持网段、IP地址、IP范围'
-    )
-    is_assigned: Optional[int] = Field(
-        default=-1, description='是否已分配使用，0-否，1-是'
-    )
-    assignment: Optional[str] = Field(
-        default='', max_length=128, description='IP分配信息'
-    )
-    idc_name: Optional[str] = Field(
-        default='', max_length=64, description='所属机房名称'
-    )
-    ip_owner: Optional[str] = Field(
-        default='', max_length=64, description='IP归属'
-    )
-    dns: Optional[str] = Field(
-        default='8.8.8.8', max_length=32, description='DNS'
-    )
-    page: Optional[int] = Field(default=0, description='页码')
-    page_size: Optional[int] = Field(default=00, description='页容量')
-
-
 class IPAddrDetail(IPAddr):
     ipver: Optional[int] = Field(default=4, description='IP版本')
     netmask: Optional[int] = Field(default=24, description='子网掩码')
@@ -356,7 +296,7 @@ class IPAddrDetail(IPAddr):
     updated_at: Optional[str] = Field(default='', description='更新时间')
 
 
-class IPAddrUpd(IPBase):
+class IPAddrUpd(LocBaseModel):
     id: int = Field(description='ID')
 
     vlan_id: Optional[str] = Field(
@@ -388,7 +328,7 @@ class IPAddrUpd(IPBase):
         orm_mode = True
 
 
-class IPAddrExpand(IPBase):
+class IPAddrExpand(LocBaseModel):
     id: int = Field(description='ID')
     ipaddr: Optional[str] = Field(max_length=32, description='IP地址')
 
@@ -412,7 +352,7 @@ class IPAddrExpand(IPBase):
         orm_mode = True
 
 
-class IPAddrExpandUpd(IPBase):
+class IPAddrExpandUpd(LocBaseModel):
     id: int = Field(description='ID')
 
     is_assigned: Optional[int] = Field(
@@ -439,27 +379,3 @@ class IPAddrExpandDetail(IPAddrExpand):
     created_at: Optional[str] = Field(default='', description='创建时间')
     updated_by: Optional[int] = Field(default=0, description='Ogcloud用户ID')
     updated_at: Optional[str] = Field(default='', description='更新时间')
-
-
-class IPAddrExpandQuery(IPBase):
-    ipaddr_id: Optional[int] = Field(default=0, description='IP资源ID')
-    ipaddr: Optional[str] = Field(max_length=32, description='IP地址')
-
-    is_assigned: Optional[int] = Field(
-        default=-1, description='是否已分配使用，0-否，1-是'
-    )
-    assignment: Optional[str] = Field(
-        default='', max_length=128, description='IP分配信息'
-    )
-    relate_inf: Optional[str] = Field(
-        default='', max_length=32, description='关联界面'
-    )
-    idc_device: Optional[str] = Field(
-        default='', max_length=64, description='IDC设备'
-    )
-    idc_dev_port: Optional[str] = Field(
-        default='', max_length=32, description='IDC设备关联端口'
-    )
-
-    page: Optional[int] = Field(default=0, description='页码')
-    page_size: Optional[int] = Field(default=00, description='页容量')

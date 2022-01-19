@@ -4,8 +4,9 @@ import typing
 from sqlalchemy.orm import Session
 
 from app.core import ObjectExistsError, curd_ac_deco, ObjectNotFound, update_qo
+from app.enums import IPCategoryEnum
 from app.models.netls import IPAddrModel, IPExpandModel
-from app.schema.netls import IPAddrDetail, IPAddrExpandDetail, IPAddrQuery, IPAddr, IPAddrExpandQuery, IPAddrExpand
+from app.schema.netls import IPAddrDetail, IPAddrExpandDetail, IPAddr, IPAddrExpand
 
 
 @curd_ac_deco
@@ -69,8 +70,8 @@ def add(db: Session, ipaddr_dic: typing.Dict) -> typing.Tuple[bool, typing.Any]:
     db.refresh(ipaddr)
 
     # IPAddr Expand
-    parse_call = _parse_network if category == 'network' else \
-        _parse_range if category == 'range' else None
+    parse_call = _parse_network if category == IPCategoryEnum.network else \
+        _parse_range if category == IPCategoryEnum.iprange else None
     if parse_call:
         add_ipaddr_expand(
             db, ipaddr.id, ipaddr_dic['ipaddr'],
@@ -165,62 +166,80 @@ def get(db: Session, id: int, expand: bool = False):
 
 
 @curd_ac_deco
-def get_list(db: Session, sch: IPAddrQuery) -> typing.Tuple[bool, typing.List]:
+def get_list(
+        db: Session, vlan_id: str, flag: int,
+        ipaddr: str, is_assigned: int, assignment: str,
+        idc_name: str, ip_owner: str, page: int,
+        page_size: int
+) -> typing.Tuple[bool, typing.Any]:
     """
     查询IP资源列表
     """
     conditions = []
 
-    if sch.vlan_id and sch.vlan_id.strip():
-        conditions.append(IPAddrModel.vlan_id == sch.vlan_id.strip())
-    if sch.flag != -1:
-        conditions.append(IPAddrModel.flag == sch.flag)
-    if sch.is_assigned > -1:
-        conditions.append(IPAddrModel.is_assigned == sch.is_assigned)
-    if sch.ipaddr.strip():
-        conditions.append(IPAddrModel.ipaddr.like(f"%{sch.ipaddr.strip()}%"))
-    if sch.idc_name.strip():
-        conditions.append(IPAddrModel.idc_name.like(f"%{sch.idc_name.strip()}%"))
-    if sch.assignment.strip():
-        conditions.append(IPAddrModel.assignment.like(f"%{sch.assignment.strip()}%"))
-    if sch.ip_owner.strip():
-        conditions.append(IPAddrModel.ip_owner == sch.ip_owner.strip())
+    if vlan_id:
+        conditions.append(IPAddrModel.vlan_id == vlan_id)
+    if flag != -1:
+        conditions.append(IPAddrModel.flag == flag)
+    if is_assigned > -1:
+        conditions.append(IPAddrModel.is_assigned == is_assigned)
+    if ipaddr:
+        conditions.append(IPAddrModel.ipaddr.like(f"%{ipaddr}%"))
+    if idc_name:
+        conditions.append(IPAddrModel.idc_name.like(f"%{idc_name}%"))
+    if assignment:
+        conditions.append(IPAddrModel.assignment.like(f"%{assignment}%"))
+    if ip_owner:
+        conditions.append(IPAddrModel.ip_owner == ip_owner)
 
-    qobjs = db.query(IPAddrModel).filter(*conditions)
-    qobjs = qobjs.group_by(IPAddrModel.vlan_id).order_by(IPAddrModel.created_at.desc())
-    if sch.page > 0:
-        offset_pos = (sch.page - 1) * sch.page_size
-        qobjs = qobjs.offset(offset_pos).limit(sch.page_size)
+    qobjs = db.query(IPAddrModel).filter(*conditions).order_by(IPAddrModel.created_at.desc())
+    count = qobjs.count()
+    if page > 0:
+        offset_pos = (page - 1) * page_size
+        qobjs = qobjs.offset(offset_pos).limit(page_size)
+    result = {
+        'count': count,
+        'list': [IPAddr.from_orm(qo) for qo in qobjs.all()]
+    }
 
-    return True, [IPAddr.from_orm(qo) for qo in qobjs.all()]
+    return True, result
 
 
 @curd_ac_deco
-def get_expand_list(db: Session, sch: IPAddrExpandQuery) -> typing.Tuple[bool, typing.List]:
+def get_expand_list(
+        db: Session, ipaddr_id: int, flag: int,
+        ipaddr: str, is_assigned: int, assignment: str,
+        relate_inf: str, idc_device: str, idc_dev_port: str,
+        page: int, page_size: int
+) -> typing.Tuple[bool, typing.Any]:
     """
     查询IP资源对应IP地址列表
     """
-    conditions = []
+    conditions = [IPExpandModel.ipaddr_id == ipaddr_id]
 
-    if sch.ipaddr_id > 0:
-        conditions.append(IPExpandModel.ipaddr_id == sch.ipaddr_id)
-    if sch.ipaddr.strip():
-        conditions.append(IPAddrModel.ipaddr.like(f"%{sch.ipaddr.strip()}%"))
-    if sch.is_assigned > -1:
-        conditions.append(IPAddrModel.is_assigned == sch.is_assigned)
-    if sch.assignment.strip():
-        conditions.append(IPAddrModel.assignment.like(f"%{sch.assignment.strip()}%"))
-    if sch.idc_device.strip():
-        conditions.append(IPAddrModel.assignment.like(f"%{sch.idc_device.strip()}%"))
-    if sch.idc_dev_port.strip():
-        conditions.append(IPAddrModel.assignment.like(f"%{sch.idc_dev_port.strip()}%"))
-    if sch.relate_inf.strip():
-        conditions.append(IPAddrModel.assignment.like(f"%{sch.relate_inf.strip()}%"))
+    if flag > -1:
+        conditions.append(IPExpandModel.flag == flag)
+    if ipaddr:
+        conditions.append(IPExpandModel.ipaddr.like(f"%{ipaddr}%"))
+    if is_assigned > -1:
+        conditions.append(IPExpandModel.is_assigned == is_assigned)
+    if assignment:
+        conditions.append(IPExpandModel.assignment.like(f"%{assignment}%"))
+    if idc_device:
+        conditions.append(IPExpandModel.assignment.like(f"%{idc_device}%"))
+    if idc_dev_port:
+        conditions.append(IPExpandModel.assignment.like(f"%{idc_dev_port}%"))
+    if relate_inf:
+        conditions.append(IPExpandModel.assignment.like(f"%{relate_inf}%"))
 
-    qobjs = db.query(IPExpandModel).filter(*conditions)
-    qobjs.group_by(IPExpandModel.ipaddr_id).order_by(IPAddrModel.created_at.desc())
-    if sch.page > 0:
-        offset_pos = (sch.page - 1) * sch.page_size
-        qobjs = qobjs.offset(offset_pos).limit(sch.page_size)
+    qobjs = db.query(IPExpandModel).filter(*conditions).order_by(IPExpandModel.ipaddr_id.desc())
+    count = qobjs.count()
+    if page > 0:
+        offset_pos = (page - 1) * page_size
+        qobjs = qobjs.offset(offset_pos).limit(page_size)
+    result = {
+        'count': count,
+        'list': [IPAddrExpand.from_orm(qo) for qo in qobjs.all()]
+    }
 
-    return True, [IPAddrExpand.from_orm(qo) for qo in qobjs.all()]
+    return True, result

@@ -1,9 +1,9 @@
-from typing import Optional, List, Any
+from typing import Optional
 
-from pydantic import BaseModel
+from app.schema import LocBaseModel
 
 
-class ContinentSchema(BaseModel):
+class ContinentSchema(LocBaseModel):
     id: int
     cn_name: str
     en_name: str
@@ -12,7 +12,7 @@ class ContinentSchema(BaseModel):
         orm_mode = True
 
 
-class CountrySchema(BaseModel):
+class CountrySchema(LocBaseModel):
     id: int
     name: str
     cname: str
@@ -23,7 +23,7 @@ class CountrySchema(BaseModel):
         orm_mode = True
 
 
-class CitySchema(BaseModel):
+class CitySchema(LocBaseModel):
     id: int
     state: Optional[str] = None
     name: str

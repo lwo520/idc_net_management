@@ -1,13 +1,15 @@
 import ipaddress
 import typing
+from typing import Optional
 
 from fastapi import APIRouter, Depends
+from pydantic import Field
 from sqlalchemy.orm import Session
 
-from app.enums import IPCategoryEnum
+from app.enums import IPCategoryEnum, NetFlagEnum
 from app.errcode import *
 from app.core import get_db, ok, failed, get_hashcode, ObjectExistsError, ObjectNotFound
-from app.schema.netls import IPAddrAdd, IPAddr, IPAddrUpd, IPAddrExpandUpd, IPAddrQuery, IPAddrExpandQuery
+from app.schema.netls import IPAddrAdd, IPAddrUpd, IPAddrExpandUpd, IPAddrExpand
 from app.curd.netls import ipaddr as ip_curd
 
 
@@ -58,7 +60,7 @@ def check_raw_ipaddr(strip_ipaddr: str) -> typing.Tuple[str, int]:
     raise ValueError('IPv4地址输入有误，请检查！')
 
 
-router = APIRouter(prefix='/netls', tags=['IP-IP地址管理'])
+router = APIRouter(prefix='/netls', tags=['IP-IP资源管理'])
 
 
 @router.post('/ipaddr/', summary='添加IP资源，支持网段和范围')
@@ -112,7 +114,7 @@ async def delete_ipaddr(db: Session = Depends(get_db), *, id: int):
     return ok()
 
 
-@router.delete('/ipaddr/batch/', summary='删除IP资源列表')
+@router.delete('/ipaddr/batch/', summary='批量删除IP资源列表')
 async def batch_del_ipaddr(db: Session = Depends(get_db), *, id_list: typing.List[int]):
     done, _ = ip_curd.delete_list(db, id_list)
     if not done:
@@ -120,7 +122,7 @@ async def batch_del_ipaddr(db: Session = Depends(get_db), *, id_list: typing.Lis
     return ok()
 
 
-@router.delete('/ipaddr/expand/', summary='删除IP网段/IP区间对应的IP地址')
+@router.delete('/ipaddr/expand/', summary='删除IP资源展开的IP地址')
 async def delete_expand(db: Session = Depends(get_db), *, id: int):
     done, _ = ip_curd.delete_expand(db, id)
     if not done:
@@ -128,7 +130,7 @@ async def delete_expand(db: Session = Depends(get_db), *, id: int):
     return ok()
 
 
-@router.delete('/ipaddr/expand/batch/', summary='删除IP网段/IP区间对应的IP地址列表')
+@router.delete('/ipaddr/expand/batch/', summary='批量删除IP资源展开的IP地址列表')
 async def batch_del_ipexpand(db: Session = Depends(get_db), *, id_list: typing.List[int]):
     done, _ = ip_curd.delete_exp_list(db, id_list)
     if not done:
@@ -136,9 +138,9 @@ async def batch_del_ipexpand(db: Session = Depends(get_db), *, id_list: typing.L
     return ok()
 
 
-async def _update(db: Session, ipaddr_dic: typing.Dict):
+async def _update(db: Session, ipaddr_dic: typing.Dict, expand: bool = False):
     try:
-        done, _ = ip_curd.update(db, ipaddr_dic)
+        done, _ = ip_curd.update(db, ipaddr_dic, expand)
         if not done:
             return failed(message='更新IP资源失败')
         return ok()
@@ -150,16 +152,14 @@ async def _update(db: Session, ipaddr_dic: typing.Dict):
 async def update_ipaddr(db: Session = Depends(get_db), *, ipaddr: IPAddrUpd):
     if ipaddr.id <= 0:
         return failed(ParamError.code, message='参数错误，IP资源ID不合法')
-    return _update(db, ipaddr.dict())
+    return await _update(db, ipaddr.dict())
 
 
-@router.put('/ipaddr/expand/', summary='更新IP资源对应的IP地址')
+@router.put('/ipaddr/expand/', summary='更新IP资源展开的IP地址信息')
 async def update_ipexpand(db: Session = Depends(get_db), *, ipexpand: IPAddrExpandUpd):
     if ipexpand.id <= 0:
         return failed(ParamError.code, message='参数错误，IP地址ID不合法')
-    ipaddr_dic = ipexpand.dict()
-    ipaddr_dic.update({'expand': True})
-    return _update(db, ipaddr_dic)
+    return await _update(db, ipexpand.dict(), True)
 
 
 async def _update_batch(db: Session, list_: typing.List, expand: bool = False):
@@ -169,44 +169,113 @@ async def _update_batch(db: Session, list_: typing.List, expand: bool = False):
     return ok()
 
 
-@router.put('/ipaddr/batch/', summary='更新IP资源信息')
-async def batch_upd_ipaddr(db: Session = Depends(get_db), *, ipaddrs: typing.List[IPAddrUpd]):
-    return _update_batch(db, ipaddrs)
+@router.put('/ipaddr/batch/', summary='批量更新IP资源信息')
+async def batch_upd_ipaddr(
+        db: Session = Depends(get_db),
+        *,
+        ipaddrs: typing.List[IPAddrUpd]
+):
+    return await _update_batch(db, ipaddrs)
 
 
-@router.put('/ipaddr/expand/batch/', summary='更新IP资源对应的IP地址')
-async def batch_upd_ipexpand(db: Session = Depends(get_db), *, expands: typing.List[IPAddrExpandUpd]):
-    return _update_batch(db, expands, True)
+@router.put('/ipaddr/expand/batch/', summary='批量更新IP资源展开的IP地址信息')
+async def batch_upd_ipexpand(
+        db: Session = Depends(get_db),
+        *,
+        expands: typing.List[IPAddrExpandUpd]
+):
+    return await _update_batch(db, expands, True)
 
 
 async def _get_detail(db: Session, id: int, expand: bool = False):
-    done, ipaddr = ip_curd.get(db, id)
+    done, ipaddr = ip_curd.get(db, id, expand)
     if not done:
-        return failed(message='获取IP资源/IP地址详情失败')
+        return failed(message='IP资源/IP地址不存在')
     return ok(data=ipaddr)
 
 
 @router.get('/ipaddr/', summary='查询IP资源详情')
 async def get_ipaddr(db: Session = Depends(get_db), *, id: int):
-    return _get_detail(db, id)
+    return await _get_detail(db, id)
 
 
-@router.get('/ipaddr/expand/', summary='查询IP资源对应IP地址详情')
+@router.get('/ipaddr/expand/', summary='查询IP资源展开的IP地址详情')
 async def get_ipexpand(db: Session = Depends(get_db), *, id: int):
-    return _get_detail(db, id, True)
+    return await _get_detail(db, id, True)
 
 
 @router.get('/ipaddr/list/', summary='查询IP资源列表')
-async def get_ipaddr_list(db: Session = Depends(get_db), *, query: IPAddrQuery):
-    done, list_ = ip_curd.get_list(db, query)
+async def get_ipaddr_list(
+        db: Session = Depends(get_db),
+        *,
+        vlan_id: Optional[str] = '',
+        flag: Optional[int] = NetFlagEnum.inner,
+        ipaddr: Optional[str] = '',
+        is_assigned: Optional[int] = -1,
+        assignment: Optional[str] = '',
+        idc_name: Optional[str] = '',
+        ip_owner: Optional[str] = '',
+        page: Optional[int] = 0,
+        page_size: Optional[int] = 10
+):
+    """
+    参数说明：\n
+        vlan_id: 数字1-4096，以及2个特殊的：L3 和BGP'
+        flag: 网络标志，0-内网，1-公网
+        ipaddr: IP，支持网段、IP地址、IP范围
+        is_assigned: 是否已分配使用，0-否，1-是，-1-全部
+        assignment: IP分配信息
+        idc_name: 所属机房名称
+        ip_owner: IP归属
+        page: 页码
+        page_size: 页容量
+    """
+    done, result = ip_curd.get_list(
+        db, vlan_id, flag, ipaddr,
+        is_assigned, assignment, idc_name,
+        ip_owner, page, page_size
+    )
     if not done:
         return failed(message='获取IP资源列表失败')
-    return ok(data=list_)
+    return ok(data=result)
 
 
-@router.get('/ipaddr/expand/list/', summary='查询IP资源对应IP地址列表')
-async def get_ipexpand_list(db: Session = Depends(get_db), *, query: IPAddrExpandQuery):
-    done, list_ = ip_curd.get_expand_list(db, query)
+@router.get('/ipaddr/expand/list/', summary='查询IP资源展开IP地址列表')
+async def get_ipexpand_list(
+        db: Session = Depends(get_db),
+        *,
+        ipaddr_id: int = 0,
+        flag: Optional[int] = NetFlagEnum.inner,
+        ipaddr: Optional[str] = '',
+        is_assigned: Optional[int] = -1,
+        assignment: Optional[str] = '',
+        relate_inf: Optional[str] = '',
+        idc_device: Optional[str] = '',
+        idc_dev_port: Optional[str] = '',
+        page: Optional[int] = 0,
+        page_size: Optional[int] = 10
+):
+    """
+    参数说明：\n
+        ipaddr_id: IP资源ID
+        flag: 网络标志，0-内网，1-公网
+        ipaddr: IP，支持网段、IP地址、IP范围
+        is_assigned: 是否已分配使用，0-否，1-是
+        assignment: IP分配信息
+        relate_inf: IP分配信息
+        idc_device: IDC设备
+        idc_dev_port: IDC设备关联端口
+        page: 页码
+        page_size: 页容量
+    """
+    if ipaddr_id <= 0:
+        return failed(ParamError.code, message='请输入对应的IP资源ID')
+    done, result = ip_curd.get_expand_list(
+        db, ipaddr_id, flag,
+        ipaddr, is_assigned, assignment,
+        relate_inf, idc_device, idc_dev_port,
+        page, page_size
+    )
     if not done:
-        return failed(message='获取IP资源对应IP地址列表失败')
-    return ok(data=list_)
+        return failed(message='获取IP资源展开IP地址列表失败')
+    return ok(data=result)
